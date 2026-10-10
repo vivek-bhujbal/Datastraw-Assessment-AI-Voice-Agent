@@ -1,0 +1,30 @@
+{
+  "brand": "Aura Skincare is a premium organic Indian skincare brand focused on simple, effective skincare products made with thoughtfully selected ingredients.",
+  "shipping": {
+    "free_above_inr": 499,
+    "charge_below_inr": 50,
+    "exactly_499": "Unspecified. Do not infer a charge or free delivery.",
+    "delivery": "3–5 business days"
+  },
+  "returns": {
+    "days_after_delivery": 7,
+    "unopened": true,
+    "unused": true,
+    "original_packaging": true
+  },
+  "damaged_or_defective": {
+    "report_within_hours_after_delivery": 48,
+    "photos_required_for_replacement": true
+  },
+  "cancellation": {
+    "allowed_status": "Processing",
+    "shipped_or_out_for_delivery": "Cannot be cancelled. Customers may refuse delivery at the doorstep."
+  },
+  "cod": {
+    "maximum_value_inr_inclusive": 2500,
+    "doorstep_payment": ["cash", "UPI"]
+  },
+  "unknown_information": "Do not invent ingredients, medical benefits, stock, discounts, other payment policies, contacts or refund timelines.",
+  "fixtures": "Relative order times are assessment fixtures, not live courier updates or calendar dates."
+}
+
