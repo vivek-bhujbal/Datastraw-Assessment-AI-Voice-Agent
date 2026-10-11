@@ -4,7 +4,9 @@ The frontend needs a Node-capable host. The backend needs an always-running ASGI
 
 ## AntiDeploy: deploy both services as one app
 
-Upload the **project root**, which now contains a combined `Dockerfile`; do not choose only `frontend/` as the deployment root. AntiDeploy [uses a root Dockerfile when the account supports custom Docker builds](https://antideploy.com/platform/hosting). If the build logs say the Dockerfile was skipped, this combined setup has not been built: use an eligible account or deploy the two services separately as described below.
+For a GitHub-linked app, commit and push these files to the connected branch before deploying the latest commit. AntiDeploy rejects direct archive uploads to a GitHub-linked app. In the app settings, select the whole project as the deployment root so the root `Dockerfile` is used. A deployment rooted at `frontend` runs only Next.js.
+
+For a folder-upload app, upload the **project root**, which now contains a combined `Dockerfile`; do not choose only `frontend/` as the deployment root. AntiDeploy [uses a root Dockerfile when the account supports custom Docker builds](https://antideploy.com/platform/hosting). If the build logs say the Dockerfile was skipped, this combined setup has not been built: use an eligible account or deploy the two services separately as described below.
 
 The container starts Next.js, FastAPI and an Nginx proxy together. The frontend uses `/api`, which stays on the same public HTTPS domain. `/api/health` and `/api/orders` reach FastAPI; `/api/ws/call` upgrades to its voice WebSocket. No separate public backend URL is required. The root Dockerfile always builds the frontend with `NEXT_PUBLIC_API_URL=/api`, overriding local development URLs.
 
