@@ -1,7 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const greeting = "Hi, I’m Aria from Aura Skincare. How can I help you today?";
-const api = process.env.TEST_API_URL || "http://localhost:8000";
+const api = new URL(
+  process.env.TEST_API_URL || process.env.NEXT_PUBLIC_API_URL || "/api",
+  process.env.TEST_BASE_URL || "http://localhost:3000",
+).toString().replace(/\/+$/, "");
 const wsUrl = api.replace(/^http/, "ws") + "/ws/call";
 
 async function observeAudio(page: Page) {

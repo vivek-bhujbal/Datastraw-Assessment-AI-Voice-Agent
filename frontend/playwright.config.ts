@@ -1,4 +1,7 @@
 import { defineConfig } from "@playwright/test";
+import { loadEnvConfig } from "@next/env";
+
+loadEnvConfig(__dirname);
 
 export default defineConfig({
   testDir: "./tests",

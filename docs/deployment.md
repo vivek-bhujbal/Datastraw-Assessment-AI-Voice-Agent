@@ -2,6 +2,34 @@
 
 The frontend needs a Node-capable host. The backend needs an always-running ASGI process with public WebSockets; a short-lived serverless HTTP function is unsuitable. No FFmpeg or database service is needed because the browser sends valid WAV.
 
+## AntiDeploy: deploy both services as one app
+
+Upload the **project root**, which now contains a combined `Dockerfile`; do not choose only `frontend/` as the deployment root. AntiDeploy [uses a root Dockerfile when the account supports custom Docker builds](https://antideploy.com/platform/hosting). If the build logs say the Dockerfile was skipped, this combined setup has not been built: use an eligible account or deploy the two services separately as described below.
+
+The container starts Next.js, FastAPI and an Nginx proxy together. The frontend uses `/api`, which stays on the same public HTTPS domain. `/api/health` and `/api/orders` reach FastAPI; `/api/ws/call` upgrades to its voice WebSocket. No separate public backend URL is required. The root Dockerfile always builds the frontend with `NEXT_PUBLIC_API_URL=/api`, overriding local development URLs.
+
+1. In AntiDeploy's environment settings, set `GEMINI_API_KEY` to your real Gemini key and `FRONTEND_ORIGINS` to the exact public frontend origin copied from your browser (scheme plus hostname; no trailing slash or path).
+2. Set the three URL values if the form asks for them:
+
+   | Variable | Combined deployment value |
+   | --- | --- |
+   | `NEXT_PUBLIC_API_URL` | `/api` |
+   | `TEST_API_URL` | Your public frontend origin followed by `/api` |
+   | `TEST_BASE_URL` | Your public frontend origin |
+
+   The `TEST_*` values are only for browser tests. `.env.example` at the project root is the full deployment template; `frontend/.env.deploy.example` contains the three frontend URL values. Update their example origin if your actual address differs. Keep the real Gemini key in the platform's secret settings rather than committing it.
+3. Redeploy the project root and check that the root Dockerfile is used. Saving a local `.env.local` file does not change an existing remote deployment. Next.js [bakes public variables into the browser build](https://nextjs.org/docs/app/guides/environment-variables), so a new build is required.
+4. Open `https://YOUR-SITE.antideploy.app/api/health`. It must return JSON with `status: "ok"`; voice calls also need `provider_configured: true`. `/api/orders` must return the three sample orders. HTML or a 404 at these paths means the combined deployment is not running.
+5. Open the website, allow microphone access, and start a call. The browser should connect to `wss://YOUR-SITE.antideploy.app/api/ws/call`. The proxy explicitly forwards WebSocket upgrades and allows a long read timeout.
+
+The container listens on the platform's `PORT` (default `8080`), binds its internal services to loopback, runs as a non-root user, waits for both services before opening the public port, and exits if a service fails. The health endpoint checks configuration and liveness; it does not verify Gemini quota or model access.
+
+### Separate frontend and backend deployments
+
+The existing Dockerfiles in `frontend/` and `backend/` still support separate services. Deploy the backend on a WebSocket-capable host, set frontend `NEXT_PUBLIC_API_URL` to its public HTTPS base URL **before building**, and set the backend `FRONTEND_ORIGINS` to the public frontend origin. `TEST_API_URL` points to that backend and `TEST_BASE_URL` points to the frontend. A frontend-only deployment does not run FastAPI. Never use `localhost` or `127.0.0.1` as the public backend URL, because they refer to each visitor's computer.
+
+For local development, `frontend/.env.local` retains your local URLs. Playwright loads frontend environment files, with explicitly supplied environment variables taking precedence. The backend allows the local frontend on ports 3001 and 3107.
+
 ## Render
 
 Render documents [public WebSocket support](https://render.com/docs/websocket), [Docker deployment and build arguments](https://render.com/docs/docker), and [Blueprint configuration](https://render.com/docs/blueprint-spec). Both Dockerfiles run as non-root users.

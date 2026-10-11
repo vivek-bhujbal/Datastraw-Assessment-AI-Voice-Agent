@@ -20,16 +20,16 @@ Get a key from [Google AI Studio](https://aistudio.google.com/apikey), then set 
 In one terminal, from `backend/`:
 
 ```powershell
-.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8107 --ws-max-size 5000000
+.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --ws-max-size 5000000
 ```
 
 In another, from `frontend/`:
 
 ```powershell
-npm.cmd run dev -- --hostname 127.0.0.1 --port 3107
+npm.cmd run dev -- --hostname 127.0.0.1 --port 3001
 ```
 
-Open **http://127.0.0.1:3107**, click **Start call**, and allow microphone access. Speak after the state changes to **Listening**. Pause at the end of a sentence; Aria answers automatically. **End call** stops recording and playback immediately, then requests a summary. Each new call clears the old context. On macOS/Linux, use `.venv/bin/python`, `cp`, and `npm` instead of the Windows equivalents.
+Open **http://127.0.0.1:3001**, click **Start call**, and allow microphone access. Speak after the state changes to **Listening**. Pause at the end of a sentence; Aria answers automatically. **End call** stops recording and playback immediately, then requests a summary. Each new call clears the old context. On macOS/Linux, use `.venv/bin/python`, `cp`, and `npm` instead of the Windows equivalents.
 
 ## How it works
 
@@ -59,7 +59,7 @@ Only completed speech segments enter the transcript as spoken text. Interrupted 
 | `FRONTEND_ORIGINS` | `http://localhost:3000`; comma-separated exact allowed origins |
 | `MAX_SESSIONS` | `8` simultaneous calls per backend process |
 
-Local setup uses `NEXT_PUBLIC_API_URL=http://127.0.0.1:8107`. Docker Compose uses `http://localhost:8000`. HTTPS URLs automatically become WSS. This value is baked into the frontend build, so changing it requires rebuilding. Do not put a provider key in any `NEXT_PUBLIC` variable.
+Local setup uses `NEXT_PUBLIC_API_URL=http://127.0.0.1:8001`. Docker Compose uses `http://localhost:8000`. HTTPS URLs automatically become WSS. This value is baked into the frontend build, so changing it requires rebuilding. Do not put a provider key in any `NEXT_PUBLIC` variable.
 
 One provider keeps setup manageable, and separate adapters make replacement practical. Models were chosen for streaming, tool support, and a small support knowledge base. The backend calls Google's Interactions REST API through HTTPX, with `store=false` and per-call history including tool results and thought signatures. Integration details were checked against the official [audio guide](https://ai.google.dev/gemini-api/docs/audio), [TTS guide](https://ai.google.dev/gemini-api/docs/speech-generation), [function calling guide](https://ai.google.dev/gemini-api/docs/function-calling), and [structured outputs guide](https://ai.google.dev/gemini-api/docs/structured-output). Model availability and quotas depend on your account. No latency claim is made.
 
@@ -71,7 +71,7 @@ After creating `backend/.env`, run from the root:
 docker compose up --build
 ```
 
-The browser still uses `http://localhost:8000`, not Docker's internal `backend` hostname. See [deployment steps](docs/deployment.md) for HTTPS hosting on Render using the two Dockerfiles and `render.yaml`, or a Node host plus a WebSocket-capable Python host. The blueprint selects paid `starter` plans; review hosting charges before creating services. No public deployment is claimed.
+The browser still uses `http://localhost:8000`, not Docker's internal `backend` hostname. For AntiDeploy, upload the project root: its combined `Dockerfile` serves both services on one domain using `/api`. Set the backend key and public frontend origin in the platform environment settings. See [deployment steps](docs/deployment.md) for HTTPS hosting on Render using the two Dockerfiles and `render.yaml`, or a Node host plus a WebSocket-capable Python host. The blueprint selects paid `starter` plans; review hosting charges before creating services. No public deployment is claimed.
 
 ## Checks and sample questions
 
@@ -81,8 +81,8 @@ cd backend
 cd ../frontend
 npm.cmd run typecheck
 npm.cmd run build
-$env:TEST_BASE_URL='http://127.0.0.1:3107'
-$env:TEST_API_URL='http://127.0.0.1:8107'
+$env:TEST_BASE_URL='http://127.0.0.1:3001'
+$env:TEST_API_URL='http://127.0.0.1:8001'
 npm.cmd test
 ```
 
